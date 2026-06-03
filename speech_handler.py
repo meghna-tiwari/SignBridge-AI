@@ -1,19 +1,48 @@
-import pyttsx3
-import threading
+import streamlit.components.v1 as components
 
-class SpeechEngine:
-    def __init__(self):
-        self.engine = pyttsx3.init()
-        self.engine.setProperty('rate', 150)  # Speed of speech
-        self.engine.setProperty('volume', 1.0)
-        
-    def _speak(self, text):
-        self.engine.say(text)
-        self.engine.runAndWait()
+def speak(text, gender="Female"):
 
-    def speak_now(self, text):
-        """Runs speech in a separate thread to prevent blocking the camera"""
-        threading.Thread(target=self._speak, args=(text,), daemon=True).start()
+    if not text:
+        return
 
+    text = text.replace("'", "\\'")
 
-voice = SpeechEngine()
+    voice_index = 2 if gender == "Female" else 1
+    pitch = 1.2 if gender == "Female" else 1.0
+
+    js_code = f"""
+    <script>
+
+    window.speechSynthesis.cancel();
+
+    function speakNow() {{
+
+        let msg = new SpeechSynthesisUtterance("{text}");
+
+        let voices = window.speechSynthesis.getVoices();
+
+        if (voices.length > {voice_index}) {{
+            msg.voice = voices[{voice_index}];
+        }}
+
+        msg.rate = 1.0;
+        msg.pitch = {pitch};
+        msg.volume = 1.0;
+
+        window.speechSynthesis.speak(msg);
+    }}
+
+    if (speechSynthesis.getVoices().length === 0) {{
+
+        speechSynthesis.onvoiceschanged = speakNow;
+
+    }} else {{
+
+        speakNow();
+
+    }}
+
+    </script>
+    """
+
+    components.html(js_code, height=0)
