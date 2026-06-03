@@ -11,12 +11,13 @@ detector = HandDetector(maxHands=2)
 offset = 20
 imgSize = 300
 
-folder = "Data/C"
+folder = "Data/F"
 counter=0
 
 while True :
     success, img = cap.read()
     hands, img = detector.findHands(img)
+    
     if hands:
         hand = hands[0]
         x, y, w, h= hand['bbox']
@@ -49,7 +50,7 @@ while True :
 
 
         
-        cv2.imshow("ImageCrop", imgCrop)
+        # cv2.imshow("ImageCrop", imgCrop)
         cv2.imshow("ImageWhite", imgWhite)
 
     cv2.imshow("Image", img)
