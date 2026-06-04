@@ -8,7 +8,7 @@ def speak(text, gender="Female"):
     text = text.replace("'", "\\'")
 
     voice_index = 2 if gender == "Female" else 1
-    pitch = 1.2 if gender == "Female" else 1.0
+    pitch = 1.5 if gender == "Female" else 1.0
 
     js_code = f"""
     <script>
@@ -25,7 +25,7 @@ def speak(text, gender="Female"):
             msg.voice = voices[{voice_index}];
         }}
 
-        msg.rate = 1.0;
+        msg.rate = 0.5;
         msg.pitch = {pitch};
         msg.volume = 1.0;
 
