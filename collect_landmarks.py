@@ -3,10 +3,6 @@ import pandas as pd
 import time
 from cvzone.HandTrackingModule import HandDetector
 
-# -----------------------------------
-# CONFIG
-# -----------------------------------
-
 cap = cv2.VideoCapture(0)
 
 detector = HandDetector(
@@ -27,9 +23,7 @@ print("\nControls:")
 print("a -> Toggle Auto Save")
 print("q -> Quit & Save Dataset\n")
 
-# -----------------------------------
-# MAIN LOOP
-# -----------------------------------
+
 
 while True:
 
@@ -41,6 +35,10 @@ while True:
     hands, img = detector.findHands(img)
 
     if hands:
+        # print("Hands:", len(hands))
+
+        # for i, hand in enumerate(hands):
+            # print(f"Hand {i} landmarks =", len(hand["lmList"]))
 
         features = []
 
@@ -53,7 +51,7 @@ while True:
             wrist_y = lmList[0][1]
             wrist_z = lmList[0][2]
 
-            # Relative coordinates
+            
             for lm in lmList:
 
                 features.extend([
@@ -61,15 +59,13 @@ while True:
                     lm[1] - wrist_y,
                     lm[2] - wrist_z
                 ])
-
-        # Pad if only one hand is detected
+      
         while len(features) < 126:
             features.append(0)
 
-        # --------------------------
+        
         # AUTO SAVE
-        # --------------------------
-
+        
         if autoMode and (time.time() - last_save > SAVE_INTERVAL):
 
             dataset.append([label] + features)
@@ -78,9 +74,6 @@ while True:
 
             print(f"Saved: {len(dataset)}")
 
-    # --------------------------
-    # DISPLAY INFO
-    # --------------------------
 
     cv2.putText(
         img,
@@ -116,20 +109,16 @@ while True:
 
     key = cv2.waitKey(1) & 0xFF
 
-    # Toggle Auto Save
+
     if key == ord("a"):
 
         autoMode = not autoMode
 
         print(f"\nAuto Save = {autoMode}\n")
 
-    # Quit
     elif key == ord("q"):
         break
 
-# -----------------------------------
-# SAVE CSV
-# -----------------------------------
 
 columns = ["label"]
 
