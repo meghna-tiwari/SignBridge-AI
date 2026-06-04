@@ -5,9 +5,7 @@ import time
 from hand_logic import process_frame
 from speech_handler import speak
 
-# =====================================================
-# PAGE CONFIG
-# =====================================================
+
 
 st.set_page_config(
     page_title="SignBridge AI Pro",
@@ -15,11 +13,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# =====================================================
-# WORD LEARNING
-# =====================================================
 
 WORD_MAP = {
+    "M A D E": "MADE",
     "W I T H": "WITH",
     "B Y": "BY",
     "M E G H N A": "MEGHNA",
@@ -52,9 +48,7 @@ def learn_words(text):
 
     return result
 
-# =====================================================
-# CSS
-# =====================================================
+
 
 st.markdown("""
 <style>
@@ -64,6 +58,16 @@ st.markdown("""
     visibility:hidden;
     height:0%;
     position:fixed;
+}
+header[data-testid="stHeader"] {
+    display: none;
+}
+section[data-testid="stMain"] > div:first-child {
+    padding-top: 0rem !important;
+}
+
+.block-container {
+    padding-top: 0rem !important;
 }
 
 /* Bigger Spinner */
@@ -80,7 +84,7 @@ st.markdown("""
 /* Title */
 .title{
     text-align:center;
-    font-size:55px;
+    font-size:44px;
     font-weight:900;
     background:linear-gradient(
         45deg,
@@ -89,7 +93,7 @@ st.markdown("""
     );
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-    margin-top:-30px;
+    margin-top:-200px;
 }
 
 /* Current Letter */
@@ -106,19 +110,13 @@ st.markdown("""
 .sentence-box{
     background:#111;
     border-radius:12px;
-    padding:20px;
-    font-size:32px;
+    padding:12px;
+    font-size:20px;
     border-left:6px solid #00ffcc;
-    min-height:90px;
+    min-height:50px;
 }
 
-/* Side Panel */
-.panel{
-    background:rgba(255,255,255,0.05);
-    padding:20px;
-    border-radius:15px;
-    border:1px solid #333;
-}
+
 
 /* Metrics */
 .metric{
@@ -136,14 +134,11 @@ st.markdown("""
 </style>
 
 <h1 class="title">
-🤟 SIGNBRIDGE AI PRO
+ SIGNBRIDGE AI PRO
 </h1>
 
 """, unsafe_allow_html=True)
 
-# =====================================================
-# SESSION STATE
-# =====================================================
 
 if "sentence" not in st.session_state:
     st.session_state.sentence = ""
@@ -154,15 +149,7 @@ if "last_capture_time" not in st.session_state:
 if "last_added_char" not in st.session_state:
     st.session_state.last_added_char = ""
 
-# =====================================================
-# LAYOUT
-# =====================================================
-
-left, right = st.columns([1.8, 1])
-
-# =====================================================
-# LEFT
-# =====================================================
+left, right = st.columns([1.5, 1])
 
 with left:
 
@@ -172,16 +159,12 @@ with left:
 
     sentence_box = st.empty()
 
-# =====================================================
-# RIGHT
-# =====================================================
+
+
 
 with right:
 
-    st.markdown(
-        "<div class='panel'>",
-        unsafe_allow_html=True
-    )
+    
 
     st.markdown(
         "<h3 style='text-align:center;'>LIVE SIGN DETECTOR</h3>",
@@ -202,11 +185,11 @@ with right:
 
     voice_type = st.radio(
         "🗣️ Voice",
-        ["Male", "Female"],
+        ["Female", "Male"],
         horizontal=True
     )
 
-    colA, colB = st.columns(2)
+    colA, colB, colC= st.columns(3)
 
     with colA:
 
@@ -221,14 +204,18 @@ with right:
             "🗑️ Clear",
             use_container_width=True
         )
+    with colC:
+        backspace_button = st.button("⌫ Delete", use_container_width=True)
 
-# =====================================================
-# BUTTONS
-# =====================================================
+
+
 
 if clear_button:
 
     st.session_state.sentence = ""
+
+if backspace_button:
+    st.session_state.sentence = st.session_state.sentence.rstrip()[:-1]
 
 if speak_button:
 
@@ -241,18 +228,18 @@ if speak_button:
             voice_type
         )
 
-# =====================================================
-# CAMERA
-# =====================================================
+        st.success(
+            f"Speaking: {sentence}"
+        )
+
+
 
 cap = cv2.VideoCapture(0)
 
 last_char = ""
 frames_held = 0
 
-# =====================================================
-# MAIN LOOP
-# =====================================================
+
 
 while True:
 
@@ -265,13 +252,27 @@ while True:
 
     output, current_char, score = process_frame(frame)
 
-    # ------------------------------------------
-    # STATUS
-    # ------------------------------------------
+    
+
+    
 
     status = "🔴 Waiting for Sign"
+    
+    if current_char == "DEL":
+        current_time = time.time()
+        if current_time - st.session_state.last_capture_time > 1.0:
+            st.session_state.sentence = st.session_state.sentence.rstrip()[:-1]
+            st.session_state.last_capture_time = current_time
 
-    if current_char != "" and current_char != "Nothing":
+    elif current_char == "SPEAK":
+        current_time = time.time()
+        if current_time - st.session_state.last_capture_time > 2.0:
+            sentence = st.session_state.sentence.strip()
+            if sentence:
+                speak(sentence, voice_type)
+            st.session_state.last_capture_time = current_time
+
+    if current_char not in ["", "Nothing", "DEL", "SPEAK"]:
 
         status = "🟢 Detecting"
 
@@ -286,15 +287,12 @@ while True:
 
         current_time = time.time()
 
-        # --------------------------------------
-        # Stable Detection + Cooldown
-        # --------------------------------------
 
         if (
-            frames_held >= 12
+            frames_held >= 8
             and
             current_time -
-            st.session_state.last_capture_time > 1.2
+            st.session_state.last_capture_time > 0.8
         ):
 
             if (
@@ -327,14 +325,11 @@ while True:
 
         frames_held = 0
 
-    # ------------------------------------------
-    # UI UPDATE
-    # ------------------------------------------
 
     viewfinder.image(
         output,
         channels="BGR",
-        use_container_width=True
+        use_container_width=400
     )
 
     char_display.markdown(
@@ -346,10 +341,22 @@ while True:
         unsafe_allow_html=True
     )
 
+    confidence_color = "#00ff88"
+
+    if score < 0.6:
+        confidence_color = "#ffaa00"
+
+    if score < 0.3:
+        confidence_color = "#ff4444"
+
     confidence_display.markdown(
         f"""
         <div class='metric'>
-        Confidence: <b>{score*100:.1f}%</b>
+        Confidence:
+        <span style='color:{confidence_color};
+        font-weight:bold'>
+        {score*100:.1f}%
+        </span>
         </div>
         """,
         unsafe_allow_html=True
@@ -379,9 +386,5 @@ while True:
         """,
         unsafe_allow_html=True
     )
-
-# =====================================================
-# CLEANUP
-# =====================================================
 
 cap.release()
