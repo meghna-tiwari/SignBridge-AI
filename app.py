@@ -5,8 +5,6 @@ import time
 from hand_logic import process_frame
 from speech_handler import speak
 
-
-
 st.set_page_config(
     page_title="SignBridge AI Pro",
     page_icon="🤟",
