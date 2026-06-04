@@ -22,8 +22,6 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-00FFCC?style=for-the-badge&logo=streamlit&logoColor=black)
 ![OpenCV](https://img.shields.io/badge/OpenCV-Computer_Vision-0088FF?style=for-the-badge&logo=opencv&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-ML_Model-00D4AA?style=for-the-badge&logo=scikit-learn&logoColor=black)
-![Status](https://img.shields.io/badge/Status-Active-00FFCC?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-0088FF?style=for-the-badge)
 
 </div>
 
@@ -401,13 +399,6 @@ Please open an issue or submit a pull request.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
 
 **Built with 🤟 to break communication barriers.**
 
